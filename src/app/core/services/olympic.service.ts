@@ -1,31 +1,22 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Olympic } from '../models/Olympic';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root', // Rend le service disponible globalement
 })
 export class OlympicService {
-  private olympicUrl = './assets/mock/olympic.json';
-  private olympics$ = new BehaviorSubject<any>(undefined);
+  // Chemin relatif pour accéder au fichier JSON dans les assets
+  private dataUrl = 'assets/mock/olympic.json';
 
   constructor(private http: HttpClient) {}
 
-  loadInitialData() {
-    return this.http.get<any>(this.olympicUrl).pipe(
-      tap((value) => this.olympics$.next(value)),
-      catchError((error, caught) => {
-        // TODO: improve error handling
-        console.error(error);
-        // can be useful to end loading state and let the user know something went wrong
-        this.olympics$.next(null);
-        return caught;
-      })
-    );
-  }
-
-  getOlympics() {
-    return this.olympics$.asObservable();
+  /**
+   * Récupère les données des Jeux Olympiques via un appel HTTP.
+   * @returns Observable contenant une liste d'Olympic
+   */
+  getOlympicsData(): Observable<Olympic[]> {
+    return this.http.get<Olympic[]>(this.dataUrl);
   }
 }
