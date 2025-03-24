@@ -36,18 +36,31 @@ export class ChartComponent implements OnInit {
             label: 'Total des médailles',
             data: dataValues,
             backgroundColor: [
-              '#FFD700', // Or
-              '#C0C0C0', // Argent
-              '#CD7F32', // Bronze
-              '#ADD8E6', // Bleu clair
-              '#FF69B4', // Rose
+              '#956065', // Or
+              '#B8CBE7', // Argent
+              '#89A1DB', // Bronze
+              '#793D52', // Bleu clair
+              '#9780A1', // Rose
             ],
           },
         ],
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
+          tooltip: {
+            callbacks: {
+              title: function (tooltipItems) {
+                const country = tooltipItems[0].label || '';
+                return '🏅 ' + country;
+              },
+              label: function (context) {
+                const value = context.parsed;
+                return `${value}`; // Convertit le nombre en chaîne
+              },
+            },
+          },
           legend: {
             display: true,
             position: 'top',
