@@ -8,7 +8,7 @@ import { Olympic } from '../../core/models/Olympic';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  olympicsData: Olympic[] = []; // Contiendra les données récupérées
+  public olympicsData: Olympic[] = []; // Contiendra les données récupérées
   public nombreDeJO: number = 0; // Nombre d'éditions uniques des JO
   public nombreDePays: number = 0; // Nombre de pays
 
