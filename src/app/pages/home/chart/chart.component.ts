@@ -36,11 +36,11 @@ export class ChartComponent implements OnInit {
             label: 'Total des médailles',
             data: dataValues,
             backgroundColor: [
-              '#956065', // Or
-              '#B8CBE7', // Argent
-              '#89A1DB', // Bronze
-              '#793D52', // Bleu clair
-              '#9780A1', // Rose
+              '#956065', // Italy
+              '#B8CBE7', // Spain
+              '#89A1DB', // United Stats
+              '#793D52', // Germany
+              '#9780A1', // France
             ],
           },
         ],
