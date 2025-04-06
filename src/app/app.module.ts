@@ -1,21 +1,17 @@
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms'; // Import pour ngModel
 import { AppComponent } from './app.component';
 import { HomeComponent } from './pages/home/home.component';
-import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { ChartComponent } from './pages/home/chart/chart.component'; // Import du composant ChartComponent
+import { OlympicService } from './core/services/olympic.service';
+import { DetailComponent } from './pages/detail/detail.component'; // Assure-toi que DetailComponent est aussi bien importé
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    NotFoundComponent,
-    ChartComponent,
-  ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule],
-  providers: [],
+  declarations: [AppComponent, HomeComponent, DetailComponent],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
+  providers: [OlympicService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

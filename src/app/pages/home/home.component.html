@@ -19,11 +19,10 @@
       </div>
     </div>
     <!-- Vérifie que les données sont disponibles avant d'afficher le graphique -->
-    <app-chart
-      *ngIf="olympicsData.length > 0"
-      [data]="olympicsData"
-    ></app-chart>
+    <div class="chart-container">
+      <canvas id="pieChart"></canvas>
+    </div>
+
     <p *ngIf="olympicsData.length === 0">Chargement des données...</p>
   </div>
-  <a [routerLink]="['/detail']">Voir les détails</a>
 </div>
