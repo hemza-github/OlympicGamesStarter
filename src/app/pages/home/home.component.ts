@@ -4,6 +4,7 @@ import { Olympic } from '../../core/models/Olympic';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
 import { StatisticsComponent } from '../statistics/statistics.component';
+import { Statistics } from './../../core/models/Statistics';
 
 @Component({
   selector: 'app-home',
@@ -14,8 +15,16 @@ export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild(StatisticsComponent) statisticsComponent!: StatisticsComponent;
 
   public nombreDeJO!: number; // Nombre d'éditions des JO
-  public nombreDePays!: number; // Nombre de pays participants
+  public nombreDePays!: number;
+  public nombreDeMedailles!: number; // Nombre total de médailles
+  public nombreAthletes!: number; // Nombre total d'athlètes
+  public nombreDeParticipations!: number; // Nombre total de participations
   public olympicsData: Olympic[] = []; // Données récupérées
+
+  stats: Statistics[] = [
+    { label: "Nombre d'éditions des JO", value: this.nombreDeJO },
+    { label: 'Nombre de pays', value: this.nombreDePays },
+  ]; // Contiendra les statistiques
 
   chart!: Chart; // Référence au graphique
   validIds: number[] = []; // Liste des IDs valides pour navigation
@@ -33,20 +42,25 @@ export class HomeComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.nombreDeJO = this.statisticsComponent.nombreDeJO;
       this.nombreDePays = this.statisticsComponent.nombreDePays;
-      console.log('Nombre de JO :', this.nombreDeJO);
-      console.log('Nombre de pays :', this.nombreDePays);
+      this.nombreDeParticipations = this.nombreDeParticipations;
+      this.nombreDeMedailles = this.nombreDeMedailles;
+      this.nombreAthletes = this.nombreAthletes;
     }, 0); // Utilisation de setTimeout pour attendre l'initialisation
   }
 
   // Méthode pour récupérer les données émises par StatisticsComponent
-  handleData(data: { nombreDeJO: number; nombreDePays: number }): void {
+  handleData(data: {
+    nombreDeJO: number;
+    nombreDePays: number;
+    nombreDeParticipations: number;
+    nombreDeMedailles: number;
+    nombreAthletes: number;
+  }): void {
     this.nombreDeJO = data.nombreDeJO;
     this.nombreDePays = data.nombreDePays;
-
-    console.log('Données reçues de StatisticsComponent :', {
-      nombreDeJO: this.nombreDeJO,
-      nombreDePays: this.nombreDePays,
-    });
+    this.nombreDeParticipations = data.nombreDeParticipations;
+    this.nombreDeMedailles = data.nombreDeMedailles;
+    this.nombreAthletes = data.nombreAthletes;
   }
 
   // Méthode pour récupérer les données des JO

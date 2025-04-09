@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OlympicService } from '../../core/services/olympic.service';
 import { Chart, registerables } from 'chart.js';
 import { Olympic } from '../../core/models/Olympic';
+import { StatisticsComponent } from '../statistics/statistics.component';
 
 @Component({
   selector: 'app-detail',
@@ -10,6 +11,8 @@ import { Olympic } from '../../core/models/Olympic';
   styleUrls: ['./detail.component.scss'],
 })
 export class DetailComponent implements OnInit {
+  @ViewChild(StatisticsComponent) statisticsComponent!: StatisticsComponent;
+
   olympic: Olympic | undefined;
   countryId: number | undefined;
   chart: any;
