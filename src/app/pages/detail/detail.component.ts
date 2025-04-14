@@ -101,6 +101,9 @@ export class DetailComponent implements OnInit {
           scales: {
             y: {
               beginAtZero: true,
+              type: 'linear', // Définit un axe linéaire pour X
+              min: 0,
+              max: 140,
             },
           },
         },
