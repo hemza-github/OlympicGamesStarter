@@ -4,7 +4,7 @@
   </h1>
   <div class="home-container">
     <!-- Conteneur pour les statistiques -->
-    <!-- <div class="flex justify-center gap-4 mb-4">
+    <div class="flex justify-center gap-4 mb-4">
       <div
         class="border border-perso-emerald border-2 rounded-lg p-4 text-center"
       >
@@ -17,9 +17,7 @@
         Number of coutries <br />
         {{ nombreDePays }}
       </div>
-    </div> -->
-
-    <app-statistics [stats]="stats"> </app-statistics>
+    </div>
 
     <!-- Vérifie que les données sont disponibles avant d'afficher le graphique -->
     <div class="chart-container">
@@ -29,6 +27,3 @@
     <p *ngIf="olympicsData.length === 0">Chargement des données...</p>
   </div>
 </div>
-{{ nombreDeParticipations }}
-{{ nombreDeMedailles }}
-{{ nombreAthletes }}

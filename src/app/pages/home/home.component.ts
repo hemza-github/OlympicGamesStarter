@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { OlympicService } from '../../core/services/olympic.service';
 import { Olympic } from '../../core/models/Olympic';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
-import { StatisticsComponent } from '../statistics/statistics.component';
-import { Statistics } from './../../core/models/Statistics';
+import { Statistics } from '../../core/models/Statistics';
 
 @Component({
   selector: 'app-home',
@@ -12,47 +11,46 @@ import { Statistics } from './../../core/models/Statistics';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  @ViewChild(StatisticsComponent) statisticsComponent!: StatisticsComponent;
-
-  public nombreDeJO: number = 0; // Nombre d'éditions des JO
+  public nombreDeJO: number = 0;
   public nombreDePays: number = 0;
-  public nombreDeMedailles!: number; // Nombre total de médailles
-  public nombreAthletes!: number; // Nombre total d'athlètes
-  public nombreDeParticipations!: number; // Nombre total de participations
-  public olympicsData: Olympic[] = []; // Données récupérées
+  public olympicsData: Olympic[] = [];
 
-  public stats: Statistics[] = [
-    { label: "Nombre d'éditions des JO", value: this.nombreDeJO },
-    { label: 'Nombre de pays', value: this.nombreDePays },
-  ]; // Contiendra les statistiques
+  homeStats: Statistics[] = []; // Mise à jour après calcul
 
   chart!: Chart; // Référence au graphique
   validIds: number[] = []; // Liste des IDs valides pour navigation
 
   constructor(private olympicService: OlympicService, private router: Router) {
-    Chart.register(...registerables); // Registration nécessaire pour Chart.js
+    Chart.register(...registerables);
   }
 
   ngOnInit(): void {
-    this.fetchOlympicsData(); // Récupérer les données
+    this.fetchOlympicsData();
   }
 
-  // Méthode pour récupérer les données des JO
+  // Méthode pour récupérer et initialiser les données
   fetchOlympicsData(): void {
     this.olympicService.getOlympicsData().subscribe((data) => {
       this.olympicsData = data;
-      this.initializeValidIds();
-      this.initializeChart(); // Initialiser le graphique avec les données récupérées
       this.nombreDePays = this.olympicsData.length;
+
+      // Calculer le nombre d'éditions uniques
       const years = new Set<number>();
       this.olympicsData.forEach((olympic) => {
-        olympic.participations.forEach((participation) => {
-          years.add(participation.year); // Ajouter les années uniques
-        });
+        olympic.participations.forEach((participation) =>
+          years.add(participation.year)
+        );
       });
-      this.nombreDeJO = years.size; // Taille du Set = nombre d'éditions uniques
-      console.log(this.nombreDeJO);
-      console.log(this.nombreDePays);
+      this.nombreDeJO = years.size;
+
+      // Mise à jour de `homeStats`
+      this.homeStats = [
+        { label: 'Nombre de JO', value: this.nombreDeJO },
+        { label: 'Nombre de Pays', value: this.nombreDePays },
+      ];
+
+      this.initializeValidIds();
+      this.initializeChart();
     });
   }
 
@@ -109,12 +107,12 @@ export class HomeComponent implements OnInit {
         },
         onClick: (event, elements) => {
           if (elements.length > 0) {
-            const index = elements[0].index; // Index de la section cliquée
-            const selectedId = this.olympicsData[index].id; // ID correspondant
+            const index = elements[0].index;
+            const selectedId = this.olympicsData[index].id;
             if (this.isValidId(selectedId)) {
               this.navigateToDetail(selectedId);
             } else {
-              this.router.navigate(['/not-found']); // Redirection si l'ID est invalide
+              this.router.navigate(['/not-found']);
             }
           }
         },
