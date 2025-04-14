@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OlympicService } from '../../core/services/olympic.service';
 import { Chart, registerables } from 'chart.js';
 import { Olympic } from '../../core/models/Olympic';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-detail',
@@ -10,6 +11,10 @@ import { Olympic } from '../../core/models/Olympic';
   styleUrls: ['./detail.component.scss'],
 })
 export class DetailComponent implements OnInit {
+  goBack(): void {
+    this.location.back(); // Navigue vers la page précédente
+  }
+
   public nombreDeParticipations: number = 0;
   public nombreDeMedailles: number = 0;
   public nombreAthletes: number = 0;
@@ -20,7 +25,8 @@ export class DetailComponent implements OnInit {
   constructor(
     private olympicService: OlympicService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     Chart.register(...registerables);
   }
@@ -95,6 +101,9 @@ export class DetailComponent implements OnInit {
           scales: {
             y: {
               beginAtZero: true,
+              type: 'linear', // Définit un axe linéaire pour X
+              min: 0,
+              max: 140,
             },
           },
         },

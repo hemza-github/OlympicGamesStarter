@@ -17,8 +17,7 @@ p {
 }
 
 .chart-container {
-  width: 800px; /* Largeur personnalisée */
-  height: 600px; /* Hauteur personnalisée */
-  margin: auto;
-  position: relative;
+  width: 60%;
+  height: 600px; /* Ajuste la hauteur selon tes besoins */
+  position: relative; /* Pour que Chart.js s'adapte correctement */
 }
