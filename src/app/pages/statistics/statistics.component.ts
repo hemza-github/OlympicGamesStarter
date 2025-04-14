@@ -12,14 +12,6 @@ export class StatisticsComponent {
   @Input()
   stats: Statistics[] = []; // Contiendra les statistiques
 
-  @Output() dataReady = new EventEmitter<{
-    nombreDeJO: number;
-    nombreDePays: number;
-    nombreDeParticipations: number;
-    nombreDeMedailles: number;
-    nombreAthletes: number;
-  }>();
-
   public olympicsData: Olympic[] = []; // Contiendra les données récupérées
   public nombreDeJO: number = 0; // Nombre d'éditions uniques des JO
   public nombreDePays: number = 0; // Nombre de pays
@@ -30,7 +22,7 @@ export class StatisticsComponent {
   constructor(private olympicService: OlympicService) {}
 
   ngOnInit(): void {
-    this.fetchOlympicsData(); // Récupérer les données des JO au chargement
+    console.log(this.stats); // Récupérer les données des JO au chargement
   }
 
   // Méthode pour récupérer les données depuis le service
@@ -38,7 +30,7 @@ export class StatisticsComponent {
     this.olympicService.getOlympicsData().subscribe((data) => {
       this.olympicsData = data; // Stocker les données récupérées
       this.performCalculations(); // Appeler les calculs
-      this.emitData(); // Émettre les données calculées
+      // this.emitData(); // Émettre les données calculées
     });
   }
 
@@ -52,7 +44,7 @@ export class StatisticsComponent {
   }
 
   // Méthode pour émettre les données calculées
-  private emitData(): void {
+  /* private emitData(): void {
     this.dataReady.emit({
       nombreDeJO: this.nombreDeJO,
       nombreDePays: this.nombreDePays,
@@ -60,7 +52,7 @@ export class StatisticsComponent {
       nombreDeMedailles: this.nombreDeMedailles,
       nombreAthletes: this.nombreAthletes,
     });
-  }
+  } */
 
   // Calcul du nombre d'éditions uniques des JO
   private calculateNombreDeJO(): void {

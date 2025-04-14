@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { OlympicService } from '../../core/services/olympic.service';
 import { Olympic } from '../../core/models/Olympic';
 import { Chart, registerables } from 'chart.js';
@@ -11,17 +11,17 @@ import { Statistics } from './../../core/models/Statistics';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements OnInit {
   @ViewChild(StatisticsComponent) statisticsComponent!: StatisticsComponent;
 
-  public nombreDeJO!: number; // Nombre d'éditions des JO
-  public nombreDePays!: number;
+  public nombreDeJO: number = 0; // Nombre d'éditions des JO
+  public nombreDePays: number = 0;
   public nombreDeMedailles!: number; // Nombre total de médailles
   public nombreAthletes!: number; // Nombre total d'athlètes
   public nombreDeParticipations!: number; // Nombre total de participations
   public olympicsData: Olympic[] = []; // Données récupérées
 
-  stats: Statistics[] = [
+  public stats: Statistics[] = [
     { label: "Nombre d'éditions des JO", value: this.nombreDeJO },
     { label: 'Nombre de pays', value: this.nombreDePays },
   ]; // Contiendra les statistiques
@@ -37,38 +37,22 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.fetchOlympicsData(); // Récupérer les données
   }
 
-  ngAfterViewInit(): void {
-    // Attendre que les données soient prêtes dans le composant enfant
-    setTimeout(() => {
-      this.nombreDeJO = this.statisticsComponent.nombreDeJO;
-      this.nombreDePays = this.statisticsComponent.nombreDePays;
-      this.nombreDeParticipations = this.nombreDeParticipations;
-      this.nombreDeMedailles = this.nombreDeMedailles;
-      this.nombreAthletes = this.nombreAthletes;
-    }, 0); // Utilisation de setTimeout pour attendre l'initialisation
-  }
-
-  // Méthode pour récupérer les données émises par StatisticsComponent
-  handleData(data: {
-    nombreDeJO: number;
-    nombreDePays: number;
-    nombreDeParticipations: number;
-    nombreDeMedailles: number;
-    nombreAthletes: number;
-  }): void {
-    this.nombreDeJO = data.nombreDeJO;
-    this.nombreDePays = data.nombreDePays;
-    this.nombreDeParticipations = data.nombreDeParticipations;
-    this.nombreDeMedailles = data.nombreDeMedailles;
-    this.nombreAthletes = data.nombreAthletes;
-  }
-
   // Méthode pour récupérer les données des JO
   fetchOlympicsData(): void {
     this.olympicService.getOlympicsData().subscribe((data) => {
       this.olympicsData = data;
       this.initializeValidIds();
       this.initializeChart(); // Initialiser le graphique avec les données récupérées
+      this.nombreDePays = this.olympicsData.length;
+      const years = new Set<number>();
+      this.olympicsData.forEach((olympic) => {
+        olympic.participations.forEach((participation) => {
+          years.add(participation.year); // Ajouter les années uniques
+        });
+      });
+      this.nombreDeJO = years.size; // Taille du Set = nombre d'éditions uniques
+      console.log(this.nombreDeJO);
+      console.log(this.nombreDePays);
     });
   }
 
