@@ -10,75 +10,95 @@ import { Olympic } from '../../core/models/Olympic';
   styleUrls: ['./detail.component.scss'],
 })
 export class DetailComponent implements OnInit {
-  olympic: Olympic | undefined;
-  countryId: number | undefined;
-  chart: any;
+  public nombreDeParticipations: number = 0;
+  public nombreDeMedailles: number = 0;
+  public nombreAthletes: number = 0;
+
+  public olympic: Olympic | undefined;
+  public chart!: Chart;
 
   constructor(
     private olympicService: OlympicService,
     private route: ActivatedRoute,
     private router: Router
   ) {
-    // Enregistre les composants de Chart.js nécessaires
     Chart.register(...registerables);
   }
 
   ngOnInit(): void {
+    this.fetchOlympicData();
+  }
+
+  // Récupère les données pour un pays spécifique
+  fetchOlympicData(): void {
     this.route.paramMap.subscribe((params) => {
-      this.countryId = Number(params.get('id'));
+      const countryId = Number(params.get('id'));
 
-      if (this.countryId) {
-        this.loadOlympicData();
-      } else {
+      if (!countryId) {
         this.router.navigate(['/not-found']);
+        return;
       }
+
+      this.olympicService.getOlympicsData().subscribe((data) => {
+        this.olympic = data.find((olympic) => olympic.id === countryId);
+
+        if (this.olympic) {
+          this.calculateStatistics();
+          this.initializeChart();
+        } else {
+          this.router.navigate(['/not-found']);
+        }
+      });
     });
   }
 
-  loadOlympicData(): void {
-    this.olympicService.getOlympicsData().subscribe((data) => {
-      this.olympic = data.find((olympic) => olympic.id === this.countryId);
-
-      if (this.olympic) {
-        this.createChart();
-      } else {
-        this.router.navigate(['/not-found']);
-      }
-    });
-  }
-
-  createChart(): void {
+  // Calcule les statistiques pour le pays sélectionné
+  private calculateStatistics(): void {
     if (this.olympic) {
-      const years = this.olympic.participations.map((p) => p.year);
-      const medals = this.olympic.participations.map((p) => p.medalsCount);
+      this.nombreDeParticipations = this.olympic.participations.length;
 
-      const ctx = document.getElementById('medalsChart') as HTMLCanvasElement;
-      if (ctx) {
-        this.chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: years,
-            datasets: [
-              {
-                label: 'Médailles Gagnées',
-                data: medals,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                suggestedMax: 200, // Étend l'axe jusqu'à 100
-              },
+      this.nombreDeMedailles = this.olympic.participations.reduce(
+        (total, participation) => total + participation.medalsCount,
+        0
+      );
+
+      this.nombreAthletes = this.olympic.participations.reduce(
+        (total, participation) => total + participation.athleteCount,
+        0
+      );
+    }
+  }
+
+  // Initialise le graphique
+  private initializeChart(): void {
+    if (this.olympic) {
+      const labels = this.olympic.participations.map((p) => p.year);
+      const dataValues = this.olympic.participations.map((p) => p.medalsCount);
+
+      this.chart = new Chart('medalsChart', {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Médailles par Année',
+              data: dataValues,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
             },
           },
-        });
-      }
+        },
+      });
     }
   }
 }

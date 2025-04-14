@@ -1,58 +1,95 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { OlympicService } from '../../core/services/olympic.service';
+import { Statistics } from './../../core/models/Statistics';
 import { Olympic } from '../../core/models/Olympic';
-import { Chart, registerables } from 'chart.js';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-statistics',
   templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.scss'], // Correction pour "styleUrls" au lieu de "styleUrl"
+  styleUrls: ['./statistics.component.scss'],
 })
 export class StatisticsComponent {
-  @Output() dataReady = new EventEmitter<{
-    nombreDeJO: number;
-    nombreDePays: number;
-  }>();
+  @Input()
+  stats: Statistics[] = []; // Les statistiques à afficher
 
-  public olympicsData: Olympic[] = []; // Contiendra les données récupérées
-  public nombreDeJO: number = 0; // Nombre d'éditions uniques des JO
-  public nombreDePays: number = 0; // Nombre de pays
+  public olympicsData: Olympic[] = [];
+  public nombreDeJO = 0;
+  public nombreDePays = 0;
+  public nombreDeParticipations = 0;
+  public nombreDeMedailles = 0;
+  public nombreAthletes = 0;
 
-  constructor(private olympicService: OlympicService, private router: Router) {}
+  constructor(private olympicService: OlympicService) {}
 
   ngOnInit(): void {
-    this.fetchOlympicsData(); // Récupérer les données
+    this.fetchOlympicsData();
   }
 
-  // Méthode pour récupérer les données
-  fetchOlympicsData(): void {
+  private fetchOlympicsData(): void {
     this.olympicService.getOlympicsData().subscribe((data) => {
       this.olympicsData = data;
-      this.calculateNombreDeJO();
-      this.calculateNombreDePays();
-
-      // Émettre les données prêtes
-      this.dataReady.emit({
-        nombreDeJO: this.nombreDeJO,
-        nombreDePays: this.nombreDePays,
-      });
+      this.performCalculations();
     });
   }
 
-  // Calcule le nombre d'éditions uniques des JO
+  private performCalculations(): void {
+    this.calculateNombreDeJO();
+    this.calculateNombreDePays();
+    this.calculateNombreDeParticipations();
+    this.calculateNombreDeMedailles();
+    this.calculateNombreAthletes();
+
+    this.stats = [
+      { label: 'Nombre de JO', value: this.nombreDeJO },
+      { label: 'Nombre de Pays', value: this.nombreDePays },
+      { label: 'Nombre de Participations', value: this.nombreDeParticipations },
+      { label: 'Nombre de Médailles', value: this.nombreDeMedailles },
+      { label: 'Nombre d’Athlètes', value: this.nombreAthletes },
+    ];
+  }
+
   private calculateNombreDeJO(): void {
     const years = new Set<number>();
     this.olympicsData.forEach((olympic) => {
-      olympic.participations.forEach((participation) => {
-        years.add(participation.year);
-      });
+      olympic.participations.forEach((participation) =>
+        years.add(participation.year)
+      );
     });
     this.nombreDeJO = years.size;
   }
 
-  // Calcule le nombre de pays (chaque élément représente un pays)
   private calculateNombreDePays(): void {
     this.nombreDePays = this.olympicsData.length;
+  }
+
+  private calculateNombreDeParticipations(): void {
+    this.nombreDeParticipations = this.olympicsData.reduce(
+      (total, olympic) => total + olympic.participations.length,
+      0
+    );
+  }
+
+  private calculateNombreDeMedailles(): void {
+    this.nombreDeMedailles = this.olympicsData.reduce((total, olympic) => {
+      return (
+        total +
+        olympic.participations.reduce(
+          (sum, participation) => sum + participation.medalsCount,
+          0
+        )
+      );
+    }, 0);
+  }
+
+  private calculateNombreAthletes(): void {
+    this.nombreAthletes = this.olympicsData.reduce((total, olympic) => {
+      return (
+        total +
+        olympic.participations.reduce(
+          (sum, participation) => sum + participation.athleteCount,
+          0
+        )
+      );
+    }, 0);
   }
 }
