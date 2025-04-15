@@ -7,6 +7,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppComponent {
   ngOnInit(): void {
-    document.documentElement.setAttribute('data-theme', 'dark'); // Applique le thème
+    document.documentElement.setAttribute('data-theme', 'light'); // Applique le thème
   }
 }
