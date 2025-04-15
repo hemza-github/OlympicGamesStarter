@@ -2,8 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core'; // Import des hook
 import { OlympicService } from '../../core/services/olympic.service'; // Service pour récupérer les données des Jeux Olympiques
 import { Olympic } from '../../core/models/Olympic'; // Modèle des données des Olympiques
 import { Chart, registerables } from 'chart.js'; // Bibliothèque Chart.js pour les graphiques
+import ChartDataLabels from 'chartjs-plugin-datalabels'; // Plugin pour afficher les labels
 import { Router } from '@angular/router'; // Service pour la navigation
 import { Statistics } from '../../core/models/Statistics'; // Modèle pour les statistiques
+
+// Enregistrement des plugins nécessaires avec Chart.js
+Chart.register(...registerables, ChartDataLabels);
 
 @Component({
   selector: 'app-home',
@@ -13,55 +17,46 @@ import { Statistics } from '../../core/models/Statistics'; // Modèle pour les s
 export class HomeComponent implements OnInit, OnDestroy {
   // ---- Propriétés ----
 
-  // Statistiques dynamiques
   public nombreDeJO: number = 0; // Nombre total d'éditions des JO
   public nombreDePays: number = 0; // Nombre total de pays ayant participé
   public olympicsData: Olympic[] = []; // Données des JO récupérées
-
-  // Liste des statistiques dynamiques pour l'affichage
-  public homeStats: Statistics[] = [];
-
-  // Référence au graphique pour faciliter sa destruction
-  private chart!: Chart;
-
-  // Liste des IDs valides pour naviguer vers les détails
-  private validIds: number[] = [];
+  public homeStats: Statistics[] = []; // Liste des statistiques dynamiques
+  private chart!: Chart; // Référence au graphique pour destruction
+  private validIds: number[] = []; // Liste des IDs valides pour navigation
 
   constructor(
-    private olympicService: OlympicService, // Injection du service pour récupérer les données
+    private olympicService: OlympicService, // Service pour récupérer les données des JO
     private router: Router // Service pour la navigation
   ) {
-    Chart.register(...registerables); // Enregistrement des composants nécessaires de Chart.js
+    Chart.register(...registerables); // Enregistre tous les contrôleurs nécessaires
   }
 
   // ---- Méthodes du cycle de vie ----
 
   /**
-   * Hook appelé à l'initialisation du composant.
-   * Charge les données des JO et initialise les statistiques.
+   * Appelé lors de l'initialisation du composant pour charger les données.
    */
   ngOnInit(): void {
-    this.fetchOlympicsData(); // Récupération des données
+    this.fetchOlympicsData(); // Récupère les données des JO
   }
 
   /**
-   * Hook appelé avant la destruction du composant.
-   * Utilisé pour nettoyer les ressources.
+   * Appelé avant la destruction du composant pour nettoyer les ressources.
    */
   ngOnDestroy(): void {
     if (this.chart) {
-      this.chart.destroy(); // Détruit le graphique pour éviter les fuites de mémoire
+      this.chart.destroy(); // Nettoie le graphique pour éviter les fuites de mémoire
     }
   }
 
   // ---- Méthodes principales ----
 
   /**
-   * Récupère les données des JO via le service et met à jour les statistiques.
+   * Récupère les données des JO et met à jour les statistiques.
    */
   private fetchOlympicsData(): void {
     this.olympicService.getOlympicsData().subscribe((data) => {
-      this.olympicsData = data; // Stocke les données récupérées
+      this.olympicsData = data; // Stocke les données des JO
       this.nombreDePays = this.olympicsData.length; // Nombre total de pays
 
       // Calcul du nombre unique d'éditions des JO
@@ -71,7 +66,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           years.add(participation.year)
         );
       });
-      this.nombreDeJO = years.size; // Nombre total d'éditions des JO
+      this.nombreDeJO = years.size; // Nombre total d'éditions uniques
 
       // Mise à jour des statistiques dynamiques
       this.homeStats = [
@@ -79,10 +74,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         { label: 'Nombre de Pays', value: this.nombreDePays },
       ];
 
-      // Initialisation des IDs valides pour la navigation
+      // Initialise les IDs valides et le graphique
       this.initializeValidIds();
-
-      // Création du graphique avec les données
       this.initializeChart();
     });
   }
@@ -91,65 +84,96 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Initialise la liste des IDs valides pour la navigation.
    */
   private initializeValidIds(): void {
-    this.validIds = this.olympicsData.map((olympic) => olympic.id); // Extrait les IDs des données récupérées
+    this.validIds = this.olympicsData.map((olympic) => olympic.id);
   }
 
   /**
-   * Initialise le graphique des médailles par pays.
+   * Initialise le graphique avec le plugin `chartjs-plugin-datalabels`.
    */
   private initializeChart(): void {
     const labels = this.olympicsData.map((olympic) => olympic.country); // Récupère les noms des pays
     const dataValues = this.olympicsData.map((olympic) =>
-      olympic.participations.reduce((total, p) => total + p.medalsCount, 0)
-    ); // Calcule le total des médailles par pays
+      olympic.participations.reduce(
+        (total, p) => Number(total) + Number(p.medalsCount),
+        0
+      )
+    ); // Total des médailles par pays
 
     this.chart = new Chart('pieChart', {
-      type: 'pie', // Type de graphique "pie" (camembert)
+      type: 'pie',
       data: {
-        labels: labels, // Labels pour l'axe X
+        labels: labels,
         datasets: [
           {
-            label: 'Total des médailles', // Titre du graphique
-            data: dataValues, // Données à afficher
+            label: 'Total des médailles',
+            data: dataValues,
             backgroundColor: [
               '#956065',
               '#B8CBE7',
               '#89A1DB',
               '#793D52',
               '#9780A1',
-            ], // Couleurs des sections
+            ],
           },
         ],
       },
       options: {
-        responsive: true, // Rend le graphique responsive
-        maintainAspectRatio: false, // Permet d'ajuster la taille au conteneur
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 50,
+            left: 150,
+            right: 150, // Ajoute 50px d'espace sous le graphique
+          },
+        },
         plugins: {
+          datalabels: {
+            color: '#000',
+            formatter: (value, context) => {
+              const total = context.chart.data.datasets[0].data.reduce(
+                (sum, val) => Number(sum) + Number(val),
+                0
+              );
+              const percentage =
+                ((value / Number(total || 1)) * 100).toFixed(2) + '%'; // Évite la division par zéro
+              return `${
+                context.chart.data.labels?.[context.dataIndex] ?? 'N/A'
+              } (${percentage})`;
+            },
+            anchor: 'end',
+            align: 'end',
+            offset: 10,
+            font: {
+              size: 14,
+              weight: 'bold',
+            },
+          },
           tooltip: {
             callbacks: {
               title: (tooltipItems) => {
-                const country = tooltipItems[0].label || '';
-                return '🏅 ' + country; // Affiche un emoji avec le nom du pays
+                const country = tooltipItems[0]?.label || 'Pays inconnu';
+                return `🏅 ${country}`;
               },
-              label: (context) => {
-                const value = context.parsed;
-                return `${value}`; // Affiche la valeur directement
+              label: (tooltipItem) => {
+                const value = tooltipItem.raw as number;
+                return `${value} médailles`;
               },
             },
           },
           legend: {
-            display: true, // Affiche la légende
-            position: 'top', // Positionne la légende en haut
+            display: true,
+            position: 'top',
           },
         },
         onClick: (event, elements) => {
           if (elements.length > 0) {
-            const index = elements[0].index; // Récupère l'index du pays sélectionné
-            const selectedId = this.olympicsData[index].id; // Récupère l'ID du pays
+            const index = elements[0].index;
+            const selectedId = this.olympicsData[index]?.id;
             if (this.isValidId(selectedId)) {
-              this.navigateToDetail(selectedId); // Navigation vers les détails du pays sélectionné
+              this.navigateToDetail(selectedId);
             } else {
-              this.router.navigate(['/not-found']); // Redirige si l'ID est invalide
+              this.router.navigate(['/not-found']);
             }
           }
         },
@@ -159,18 +183,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   /**
    * Vérifie si un ID est valide pour la navigation.
-   * @param id - ID du pays à vérifier
-   * @returns `true` si l'ID est valide, `false` sinon
    */
   private isValidId(id: number): boolean {
-    return this.validIds.includes(id); // Vérifie la validité de l'ID
+    return this.validIds.includes(id);
   }
 
   /**
-   * Navigue vers la page des détails du pays sélectionné.
-   * @param id - ID du pays sélectionné
+   * Navigue vers la page des détails d'un pays.
    */
   private navigateToDetail(id: number): void {
-    this.router.navigate(['/detail', id]); // Redirige vers la route /detail avec l'ID spécifié
+    this.router.navigate(['/detail', id]);
   }
 }
