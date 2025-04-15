@@ -122,12 +122,23 @@ export class HomeComponent implements OnInit, OnDestroy {
         maintainAspectRatio: false,
         layout: {
           padding: {
+            top: 50,
             bottom: 50,
             left: 150,
-            right: 150, // Ajoute 50px d'espace sous le graphique
+            right: 150,
           },
         },
         plugins: {
+          legend: {
+            display: true,
+            position: 'top', // Positionne la légende au-dessus du graphique
+            labels: {
+              padding: 20, // Ajoute de l'espace entre chaque élément de la légende
+              font: {
+                size: 14, // Ajuste la taille de la police
+              },
+            },
+          },
           datalabels: {
             color: '#000',
             formatter: (value, context) => {
@@ -136,14 +147,14 @@ export class HomeComponent implements OnInit, OnDestroy {
                 0
               );
               const percentage =
-                ((value / Number(total || 1)) * 100).toFixed(2) + '%'; // Évite la division par zéro
+                ((value / Number(total || 1)) * 100).toFixed(2) + '%'; // Calcule le pourcentage
               return `${
                 context.chart.data.labels?.[context.dataIndex] ?? 'N/A'
-              } (${percentage})`;
+              } (${percentage})`; // Nom + pourcentage
             },
             anchor: 'end',
             align: 'end',
-            offset: 10,
+            offset: 10, // Décalage des labels
             font: {
               size: 14,
               weight: 'bold',
@@ -161,10 +172,6 @@ export class HomeComponent implements OnInit, OnDestroy {
               },
             },
           },
-          legend: {
-            display: true,
-            position: 'top',
-          },
         },
         onClick: (event, elements) => {
           if (elements.length > 0) {
@@ -180,7 +187,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
   }
-
   /**
    * Vérifie si un ID est valide pour la navigation.
    */
