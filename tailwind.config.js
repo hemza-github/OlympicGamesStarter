@@ -14,8 +14,6 @@ module.exports = {
   daisyui: {
     themes: [
       "light", // Thème clair
-      "dark", // Thème sombre
-      "cupcake", // Exemples de thèmes DaisyUI
     ],
   }, // Ajout de DaisyUI
 };
