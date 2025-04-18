@@ -5,6 +5,7 @@ import { Chart, registerables } from 'chart.js'; // Bibliothèque Chart.js pour 
 import ChartDataLabels from 'chartjs-plugin-datalabels'; // Plugin pour afficher les labels
 import { Router } from '@angular/router'; // Service pour la navigation
 import { Statistics } from '../../core/models/Statistics'; // Modèle pour les statistiques
+import { Subscription } from 'rxjs';
 
 // Enregistrement des plugins nécessaires avec Chart.js
 Chart.register(...registerables, ChartDataLabels);
@@ -23,6 +24,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public homeStats: Statistics[] = []; // Liste des statistiques dynamiques
   private chart!: Chart; // Référence au graphique pour destruction
   private validIds: number[] = []; // Liste des IDs valides pour navigation
+  private subscription!: Subscription;
 
   constructor(
     private olympicService: OlympicService, // Service pour récupérer les données des JO
@@ -47,6 +49,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.chart) {
       this.chart.destroy(); // Nettoie le graphique pour éviter les fuites de mémoire
     }
+    if (this.subscription) {
+      this.subscription.unsubscribe(); // Se désabonne de l'observable pour éviter les fuites
+    }
   }
 
   // ---- Méthodes principales ----
@@ -55,29 +60,31 @@ export class HomeComponent implements OnInit, OnDestroy {
    * Récupère les données des JO et met à jour les statistiques.
    */
   private fetchOlympicsData(): void {
-    this.olympicService.getOlympicsData().subscribe((data) => {
-      this.olympicsData = data; // Stocke les données des JO
-      this.nombreDePays = this.olympicsData.length; // Nombre total de pays
+    this.subscription = this.olympicService
+      .getOlympicsData()
+      .subscribe((data) => {
+        this.olympicsData = data; // Stocke les données des JO
+        this.nombreDePays = this.olympicsData.length; // Nombre total de pays
 
-      // Calcul du nombre unique d'éditions des JO
-      const years = new Set<number>();
-      this.olympicsData.forEach((olympic) => {
-        olympic.participations.forEach((participation) =>
-          years.add(participation.year)
-        );
+        // Calcul du nombre unique d'éditions des JO
+        const years = new Set<number>();
+        this.olympicsData.forEach((olympic) => {
+          olympic.participations.forEach((participation) =>
+            years.add(participation.year)
+          );
+        });
+        this.nombreDeJO = years.size; // Nombre total d'éditions uniques
+
+        // Mise à jour des statistiques dynamiques
+        this.homeStats = [
+          { label: 'Nombre de JO', value: this.nombreDeJO },
+          { label: 'Nombre de Pays', value: this.nombreDePays },
+        ];
+
+        // Initialise les IDs valides et le graphique
+        this.initializeValidIds();
+        this.initializeChart();
       });
-      this.nombreDeJO = years.size; // Nombre total d'éditions uniques
-
-      // Mise à jour des statistiques dynamiques
-      this.homeStats = [
-        { label: 'Nombre de JO', value: this.nombreDeJO },
-        { label: 'Nombre de Pays', value: this.nombreDePays },
-      ];
-
-      // Initialise les IDs valides et le graphique
-      this.initializeValidIds();
-      this.initializeChart();
-    });
   }
 
   /**
@@ -122,7 +129,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 50,
             bottom: 50,
             left: 150,
             right: 150,

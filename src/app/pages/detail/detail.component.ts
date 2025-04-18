@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core'; // Import des hooks de cycle de vie OnInit et OnDestroy
 import { ActivatedRoute, Router } from '@angular/router'; // Services pour gérer les routes et accéder aux paramètres de l'URL
 import { OlympicService } from '../../core/services/olympic.service'; // Service pour récupérer les données des Jeux Olympiques
@@ -17,6 +18,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   public nombreDeParticipations: number = 0;
   public nombreDeMedailles: number = 0;
   public nombreAthletes: number = 0;
+  private subscription!: Subscription; // Abonnement pour gérer les flux de données
 
   // Objet contenant les détails des Jeux Olympiques pour un pays spécifique
   public olympic: Olympic | undefined;
@@ -46,6 +48,9 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (this.chart) {
       this.chart.destroy();
     }
+    if (this.subscription) {
+      this.subscription.unsubscribe(); // Se désabonne de l'observable pour éviter les fuites de mémoire
+    }
   }
 
   // ---- Méthodes principales ----
@@ -64,16 +69,18 @@ export class DetailComponent implements OnInit, OnDestroy {
       }
 
       // Appelle le service pour récupérer les données
-      this.olympicService.getOlympicsData().subscribe((data) => {
-        this.olympic = data.find((olympic) => olympic.id === countryId);
+      this.subscription = this.olympicService
+        .getOlympicsData()
+        .subscribe((data) => {
+          this.olympic = data.find((olympic) => olympic.id === countryId);
 
-        if (this.olympic) {
-          this.calculateStatistics(); // Calcule les statistiques pour le pays sélectionné
-          this.initializeChart(); // Initialise le graphique pour afficher les données
-        } else {
-          this.router.navigate(['/not-found']); // Redirige si aucune donnée n'est trouvée pour l'ID donné
-        }
-      });
+          if (this.olympic) {
+            this.calculateStatistics(); // Calcule les statistiques pour le pays sélectionné
+            this.initializeChart(); // Initialise le graphique pour afficher les données
+          } else {
+            this.router.navigate(['/not-found']); // Redirige si aucune donnée n'est trouvée pour l'ID donné
+          }
+        });
     });
   }
 
