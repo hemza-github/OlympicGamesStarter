@@ -4,7 +4,6 @@ import { Olympic } from '../../core/models/Olympic'; // Modèle des données des
 import { Chart, registerables } from 'chart.js'; // Bibliothèque Chart.js pour les graphiques
 import ChartDataLabels from 'chartjs-plugin-datalabels'; // Plugin pour afficher les labels
 import { Router } from '@angular/router'; // Service pour la navigation
-import { Statistics } from '../../core/models/Statistics'; // Modèle pour les statistiques
 import { Subscription } from 'rxjs';
 
 // Enregistrement des plugins nécessaires avec Chart.js
@@ -21,7 +20,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public nombreDeJO: number = 0; // Nombre total d'éditions des JO
   public nombreDePays: number = 0; // Nombre total de pays ayant participé
   public olympicsData: Olympic[] = []; // Données des JO récupérées
-  public homeStats: Statistics[] = []; // Liste des statistiques dynamiques
   private chart!: Chart; // Référence au graphique pour destruction
   private validIds: number[] = []; // Liste des IDs valides pour navigation
   private subscription!: Subscription;
@@ -74,12 +72,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           );
         });
         this.nombreDeJO = years.size; // Nombre total d'éditions uniques
-
-        // Mise à jour des statistiques dynamiques
-        this.homeStats = [
-          { label: 'Nombre de JO', value: this.nombreDeJO },
-          { label: 'Nombre de Pays', value: this.nombreDePays },
-        ];
 
         // Initialise les IDs valides et le graphique
         this.initializeValidIds();

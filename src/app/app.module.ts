@@ -7,14 +7,8 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './pages/home/home.component';
 import { OlympicService } from './core/services/olympic.service';
 import { DetailComponent } from './pages/detail/detail.component'; // Assure-toi que DetailComponent est aussi bien importé
-import { StatisticsComponent } from './pages/statistics/statistics.component'; // Assure-toi que StatisticsComponent est aussi bien importé
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    DetailComponent,
-    StatisticsComponent,
-  ],
+  declarations: [AppComponent, HomeComponent, DetailComponent],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
   providers: [OlympicService],
   bootstrap: [AppComponent],
