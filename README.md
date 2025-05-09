@@ -85,7 +85,7 @@ Bienvenue dans le dépôt de l'application **OlympicGamesStarter**, développée
 ```bash
 # 1. Cloner le dépôt
 git clone https://github.com/hemza-github/OlympicGamesStarter.git
-cd telesport-app
+cd OlympicGamesStarter
 
 # 2. Installer les dépendances
 npm install
