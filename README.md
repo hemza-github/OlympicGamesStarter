@@ -17,7 +17,7 @@ Bienvenue dans le dépôt de l'application **OlympicGamesStarter**, développée
 
 - **Framework Frontend** : [Angular 17](https://angular.io/)
 - **Langage** : TypeScript
-- **Stylisation** : SCSS
+- **Stylisation** : SCSS DaisyUI 
 - **Routing** : Angular Router
 - **Mock API** : JSON local (assets/mock/olympic.json)
 
